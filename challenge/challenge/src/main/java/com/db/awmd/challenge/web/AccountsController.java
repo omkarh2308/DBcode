@@ -5,6 +5,9 @@ import com.db.awmd.challenge.exception.DuplicateAccountIdException;
 import com.db.awmd.challenge.service.AccountsService;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RequestParam;
+import java.math.BigDecimal;
+import com.db.awmd.challenge.exception.InsufficientBalanceException; 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -46,5 +49,17 @@ public class AccountsController {
     log.info("Retrieving account for id {}", accountId);
     return this.accountsService.getAccount(accountId);
   }
+  
+  @PostMapping(path = "/transitionAmount", consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> transactionalDetails(@RequestParam("accountFrom") String accountFrom,
+			@RequestParam("accountTo") String accountTo, @RequestParam("amount") BigDecimal amount) {
+		log.info("Transfer amount from one to another account !!!!");
+		try {
+			this.accountsService.transferAmount(accountFrom, accountTo, amount);
+		} catch (InsufficientBalanceException ie) {
+			return new ResponseEntity<>(ie.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
 
 }
