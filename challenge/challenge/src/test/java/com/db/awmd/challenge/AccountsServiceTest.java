@@ -2,7 +2,7 @@ package com.db.awmd.challenge;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
-
+import com.db.awmd.challenge.exception.InsufficientBalanceException;
 import com.db.awmd.challenge.domain.Account;
 import com.db.awmd.challenge.exception.DuplicateAccountIdException;
 import com.db.awmd.challenge.service.AccountsService;
@@ -43,4 +43,37 @@ public class AccountsServiceTest {
     }
 
   }
+  @Test
+ 	public void transitionAmount() throws Exception {
+ 		Account account = new Account("acc_Id-1010");
+ 		account.setBalance(new BigDecimal(2000));
+ 		this.accountsService.createAccount(account);
+
+ 		Account account1 = new Account("acc_Id-2020");
+ 		account1.setBalance(new BigDecimal(1000));
+ 		this.accountsService.createAccount(account1);
+ 		String accountFrom = "acc_Id-1010";
+ 		String accountTo = "acc_Id-2020";
+ 		BigDecimal amount = new BigDecimal(1200);
+ 		try {
+ 			this.accountsService.transitionAmount(accountFrom, accountTo, amount);
+ 		} catch (RuntimeException e) {
+ 			e.printStackTrace();
+ 		}
+
+ 	}
+
+ 	@Test
+ 	public void transferAmountInsufficientBalance() throws Exception {
+
+ 		String accountFrom = "acc_Id-1010";
+ 		String accountTo = "acc_Id-2020";
+ 		BigDecimal amount = new BigDecimal(500000);
+
+ 		try {
+ 			this.accountsService.transitionAmount(accountFrom, accountTo, amount);
+ 		} catch (InsufficientBalanceException ie) {
+ 			assertThat(ie.getMessage()).isEqualTo("Insufficient balance !!!");
+ 		}
+ 	}
 }

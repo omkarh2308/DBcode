@@ -101,4 +101,37 @@ public class AccountsControllerTest {
       .andExpect(
         content().string("{\"accountId\":\"" + uniqueAccountId + "\",\"balance\":123.45}"));
   }
+  @Test
+  public void transferAmount() throws Exception {
+		Account account = new Account("acc_Id-1111", new BigDecimal("20000"));
+		this.accountsService.createAccount(account);
+
+		Account account1 = new Account("acc_Id-3333", new BigDecimal("1000"));
+		this.accountsService.createAccount(account1);
+
+		String accountFrom = "acc_Id-1111";
+		String accountTo = "acc_Id-3333";
+		BigDecimal amount = new BigDecimal("5000");
+		this.mockMvc.perform(post("/v1/accounts/transferAmt").contentType(MediaType.APPLICATION_JSON)
+				.param("accountFrom", accountFrom).param("accountTo", accountTo).param("amount", amount.toString()))
+				.andExpect(status().isOk());
+
+	}
+  @Test
+	public void transferAmountInsufficientBalance() throws Exception {
+		Account account = new Account("acc_Id-1111", new BigDecimal("20000"));
+		this.accountsService.createAccount(account);
+
+		Account account1 = new Account("acc_Id-3333", new BigDecimal("1000"));
+		this.accountsService.createAccount(account1);
+
+		String accountFrom = "acc_Id-1111";
+		String accountTo = "acc_Id-3333";
+		BigDecimal amount = new BigDecimal("50000");
+		this.mockMvc.perform(post("/v1/accounts/transferAmt").contentType(MediaType.APPLICATION_JSON)
+				.param("accountFrom", accountFrom).param("accountTo", accountTo).param("amount", amount.toString()))
+				.andExpect(status().isBadRequest());
+	}
+
+  
 }
